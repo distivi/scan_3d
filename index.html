@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Test 3d</title>
+	<link rel="stylesheet" href="main.css">
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>	
+	<script src="bower_components/threejs/build/three.min.js"></script>
+	<script src="js/STLLoader.js"></script>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span6" id="canvas-container">
+				
+			</div>
+			<div class="span2">
+				<button type="button" id="scan-button" class="btn btn-success">Start scan!</button>
+				<p>Object navigation</p>
+				<div class="input-group">
+					<span class="input-group-addon">Rotate x</span>
+					<input id="temp" type="text" rotate="x" class="form-control" value="0" >
+					<span class="input-group-btn">
+						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
+						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
+					</span>
+				</div><!-- /input-group -->
+				<div class="input-group">
+					<span class="input-group-addon">Rotate y</span>
+					<input type="text" rotate="y" class="form-control" readonly value="0" >
+					<span class="input-group-btn">
+						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
+						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
+					</span>
+				</div><!-- /input-group -->
+				<div class="input-group">
+					<span class="input-group-addon">Rotate z</span>
+					<input type="text" rotate="z" class="form-control" readonly value="0" >
+					<span class="input-group-btn">
+						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
+						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
+					</span>
+				</div><!-- /input-group -->
+
+				<p>camera navigation</p>
+				<div class="input-group">
+					<span class="input-group-addon">Position x</span>
+					<input type="text" class="form-control" position="x" readonly value="0">
+					<span class="input-group-btn">
+						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
+						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
+					</span>
+				</div><!-- /input-group -->
+				<div class="input-group">
+					<span class="input-group-addon">Position y</span>
+					<input type="text" class="form-control" position="y" readonly value="0">
+					<span class="input-group-btn">
+						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
+						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
+					</span>
+				</div><!-- /input-group -->
+				<div class="input-group">
+					<span class="input-group-addon">Position z</span>
+					<input type="text" class="form-control" position="z" readonly value="0">
+					<span class="input-group-btn">
+						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
+						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
+					</span>
+				</div><!-- /input-group -->
+
+
+			</div>
+		</div>
+	</div>
+
+	<script src="main.js"></script>
+</body>
+</html> 
