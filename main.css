@@ -1,0 +1,67 @@
+*
+{
+    padding: 0;
+    margin: 0;
+}
+
+html, body
+{
+    height: 100%;
+}
+
+header
+{
+    height: 40px;
+    padding: 0 10px;
+    background-color: yellow;
+}
+
+#Container {
+	width: 100%;
+	height: calc(100% - 60px);
+    overflow: auto;
+}
+
+#Content
+{
+    height: 100%;
+    overflow: auto;
+    background: orange;
+}
+
+#draw-container {
+	display: inline-block;
+	border: 1px solid #111;
+	width: calc(100% - 254px);
+	height: calc(100% - 10px);
+	border-radius: 5px;
+}
+
+#toolbar-container {
+	float: right;
+	/*border: 1px solid #444;*/
+	background: green;
+	border-radius: 5px;
+	height: calc(100% - 10px);
+	min-height: 500px;
+	width: 250px;
+}
+
+#drop_zone
+{
+	background: #e3dde2;
+	height: 50px;
+	text-align: center;
+	font-size: 25px;
+	line-height: 50px;
+	color: #706d6f;
+	border-radius: 5px;
+	border: 1px dashed #a29c9f;
+}
+
+#files
+{
+	border: 1px solid green;
+	margin-top: 10px;
+	width: 100%;
+}

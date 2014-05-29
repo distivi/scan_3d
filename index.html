@@ -2,79 +2,66 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Test 3d</title>
+	<title>Test 3d</title>	
+	<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" >
 	<link rel="stylesheet" href="main.css">
-	<script src="bower_components/jquery/dist/jquery.min.js"></script>
-	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>	
-	<script src="bower_components/threejs/build/three.min.js"></script>
-	<script src="js/STLLoader.js"></script>
+	<!-- <link rel="stylesheet" href="main.css"> -->
 </head>
 <body>
-	<div class="container-fluid">
-		<div class="row-fluid">
-			<div class="span6" id="canvas-container">
-				
-			</div>
-			<div class="span2">
-				<button type="button" id="scan-button" class="btn btn-success">Start scan!</button>
-				<p>Object navigation</p>
-				<div class="input-group">
-					<span class="input-group-addon">Rotate x</span>
-					<input id="temp" type="text" rotate="x" class="form-control" value="0" >
-					<span class="input-group-btn">
-						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
-						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
-					</span>
-				</div><!-- /input-group -->
-				<div class="input-group">
-					<span class="input-group-addon">Rotate y</span>
-					<input type="text" rotate="y" class="form-control" readonly value="0" >
-					<span class="input-group-btn">
-						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
-						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
-					</span>
-				</div><!-- /input-group -->
-				<div class="input-group">
-					<span class="input-group-addon">Rotate z</span>
-					<input type="text" rotate="z" class="form-control" readonly value="0" >
-					<span class="input-group-btn">
-						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
-						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
-					</span>
-				</div><!-- /input-group -->
+	<header>
+		<ul class="nav nav-tabs">
+			<li class="dropdown">
+				<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+					File <span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu">
+					<li><a href="">Import</a></li>
+					<li><a href="" data-toggle="modal" data-target="#myModal">test</a></li>
+				</ul>
+			</li>
 
-				<p>camera navigation</p>
-				<div class="input-group">
-					<span class="input-group-addon">Position x</span>
-					<input type="text" class="form-control" position="x" readonly value="0">
-					<span class="input-group-btn">
-						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
-						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
-					</span>
-				</div><!-- /input-group -->
-				<div class="input-group">
-					<span class="input-group-addon">Position y</span>
-					<input type="text" class="form-control" position="y" readonly value="0">
-					<span class="input-group-btn">
-						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
-						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
-					</span>
-				</div><!-- /input-group -->
-				<div class="input-group">
-					<span class="input-group-addon">Position z</span>
-					<input type="text" class="form-control" position="z" readonly value="0">
-					<span class="input-group-btn">
-						<button class="btn btn-default" button-inc-dec="dec" type="button">-</button>
-						<button class="btn btn-default" button-inc-dec="inc" type="button">+</button>
-					</span>
-				</div><!-- /input-group -->
-
-
+		</ul>
+	</header>
+	<div id="Container">
+		<div id="Content">
+			<div id="draw-container"></div>
+			<div id="toolbar-container">
+				Tool bar
 			</div>
 		</div>
 	</div>
 
-	<script src="main.js"></script>
+	<!-- =============  -->
+	<!-- Modal dialogs  -->
+	<!-- =============  -->
+
+
+	<!-- Import dialog -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h4 class="modal-title" id="myModalLabel">Import STL File</h4>
+		  </div>
+		  <div class="modal-body">
+			<div id="drop_zone">Drop files here</div>
+			<input type="file" id="files" name="files[]" multiple />
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			<button type="button" class="btn btn-primary">Import</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>	
+	<script src="bower_components/threejs/build/three.min.js"></script>
+	<script src="js/STLLoader.js"></script>
+	<script src="navigation.js"></script>
+
 </body>
 </html> 
