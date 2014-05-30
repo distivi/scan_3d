@@ -77,6 +77,40 @@ THREE.STLLoader.prototype.load = function ( url, callback ) {
 
 };
 
+THREE.STLLoader.prototype.loadFromFile = function ( file, callback ) {
+	var fileReader = new FileReader();
+	console.log(fileReader);
+	fileReader.onload = function(event) {
+		var contents = event.target.result;
+		console.log("File contents: " + contents);
+
+		var geometry = scope.parse( event.target.response || event.target.responseText );
+		scope.dispatchEvent( { type: 'load', content: geometry } );
+
+		if ( callback ) callback( geometry );
+	};
+
+
+	fileReader.onloadend = function(event) {
+		console.log("onloadend " + event);
+	}
+
+	fileReader.onabort = function(event) {
+		console.log("onabort " + event);
+	}
+
+	fileReader.onprogress = function(event) {
+		console.log("onprogress " + event);
+	}
+
+
+	fileReader.onerror = function(event) {
+		console.error("File could not be read! Code " + event.target.error.code);
+	};
+	console.log("file start loading " + file);
+	fileReader.readAsText(file);
+}
+
 THREE.STLLoader.prototype.parse = function ( data ) {
 
 

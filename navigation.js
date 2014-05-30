@@ -15,33 +15,35 @@ $(document).ready(function(){
 		console.log(file);
 		console.log(name);
 
-		var reader = new FileReader();
-		reader.onload = function(event) {
-		    var contents = event.target.result;
-		    console.log("File contents: " + contents);
-		};
+		
 
-		reader.onerror = function(event) {
-		    console.error("File could not be read! Code " + event.target.error.code);
-		};
-		console.log("file start loading");
-		reader.readAsText(file);
+		var loader = new THREE.STLLoader();
+		loader.addEventListener( 'load', function ( event ) {
+			showHideWaiting(false);
+			geometry = event.content;
 
-		// var loader = new THREE.STLLoader();
-		// loader.addEventListener( 'load', function ( event ) {
+			console.log(geometry);
 
-		// 	geometry = event.content;
+			var material = new THREE.MeshLambertMaterial( { ambient: 0xff5533, color: 0xff5533 } );
 
-		// 	console.log(geometry);
+			stlObject = new THREE.Mesh( geometry, material );
 
-		// 	var material = new THREE.MeshLambertMaterial( { ambient: 0xff5533, color: 0xff5533 } );
+			scene.add( stlObject );
 
-		// 	stlObject = new THREE.Mesh( geometry, material );
-
-		// 	scene.add( stlObject );
-
-		// } );
-		// loader.load(name);
+		} );
+		showHideWaiting(true);
+		loader.loadFromFile(name);
 		
 	});
 });
+
+
+function showHideWaiting(isShow) {
+	var spinner = $("#waiting-spinner");
+	if (isShow) {
+		spinner.show();
+	} else {
+		spinner.hide();
+	}
+	
+}
