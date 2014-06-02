@@ -80,27 +80,26 @@ THREE.STLLoader.prototype.load = function ( url, callback ) {
 THREE.STLLoader.prototype.loadFromFile = function ( file, callback ) {
 	var fileReader = new FileReader();
 	console.log(fileReader);
+	var scope = this;
+
 	fileReader.onload = function(event) {
 		var contents = event.target.result;
-		console.log("File contents: " + contents);
+		// console.log("File contents: " + contents);
 
-		var geometry = scope.parse( event.target.response || event.target.responseText );
+		var geometry = scope.parse( contents );
+		console.log("geometry ");
+		console.log(geometry);
 		scope.dispatchEvent( { type: 'load', content: geometry } );
 
 		if ( callback ) callback( geometry );
 	};
-
-
-	fileReader.onloadend = function(event) {
-		console.log("onloadend " + event);
-	}
 
 	fileReader.onabort = function(event) {
 		console.log("onabort " + event);
 	}
 
 	fileReader.onprogress = function(event) {
-		console.log("onprogress " + event);
+		console.log("onprogress loaded = " + event.loaded + " from total = " + event.total);
 	}
 
 
@@ -134,6 +133,8 @@ THREE.STLLoader.prototype.parse = function ( data ) {
 };
 
 THREE.STLLoader.prototype.parseBinary = function (data) {
+
+	console.log("parseBinary");
 
 	var face, geometry, n_faces, reader, length, normal, i, dataOffset, faceLength, start, vertexstart;
 
@@ -178,6 +179,9 @@ THREE.STLLoader.prototype.parseBinary = function (data) {
 };
 
 THREE.STLLoader.prototype.parseASCII = function (data) {
+
+	console.log("parseASCII");
+	console.log(data);
 
 	var geometry, length, normal, patternFace, patternNormal, patternVertex, result, text;
 	geometry = new THREE.Geometry();

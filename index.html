@@ -24,9 +24,12 @@
 	</header>
 	<div id="Container">
 		<div id="Content">
-			<div id="draw-container"></div>
+			<div id="draw-container">
+				<!-- <div id="canvas-container"></div> -->
+			</div>
 			<div id="toolbar-container">
 				Tool bar
+				<button type="button" id="scan-button" class="btn btn-success">Scan</button>
 			</div>
 		</div>
 	</div>
@@ -61,7 +64,8 @@
 	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>	
 	<script src="bower_components/threejs/build/three.min.js"></script>
 	<script src="js/STLLoader.js"></script>
-	<script src="navigation.js"></script>
+	<script src="main.js"></script>
+	<script src="intersection.js"></script>
 
 
 	<div id="waiting-spinner" hidden>
