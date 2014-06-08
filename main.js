@@ -1,4 +1,4 @@
-var container, camera, scene, renderer, stlObject, scanObject;
+var container, camera, scene, renderer, stlObject, scanObject, realScanObject, helper, scanLayers;
 
 
 
@@ -8,6 +8,7 @@ $(document).ready(function() {
 	var CAMERA_DISTANCE = 100;
 	var direction = 1;
 	var scanning = false;
+	var currentY = 0;
 
 
 	init();
@@ -33,7 +34,7 @@ $(document).ready(function() {
 		createAxis(v(0, 0, -axisLength), v(0, 0, axisLength), 0x0000FF);
 	};
 
-	function createPlane(scene,sizeWidth) {
+	function createPlane(sizeWidth) {
 		// plane
 		var material = new THREE.MeshLambertMaterial( { ambient: 0xff5533, color: 0x90c9d1 } );
 		scanObject = new THREE.Mesh(new THREE.PlaneGeometry(sizeWidth, sizeWidth), material);
@@ -43,8 +44,28 @@ $(document).ready(function() {
 		scanObject.position.y = MIN_SCAN;
 		scene.add(scanObject);
 
-
 		// scanObject.rotateX(Math.PI / 2);
+	}
+
+	function createRealScanObject(radius) {
+		var geom = new THREE.Geometry();
+
+		for (var i = 0; i < 3; i++) {
+			var angle = Math.PI * 2 * (i / 3.0);
+			var x = radius * Math.cos(angle);
+			var z = radius * Math.sin(angle);
+			var v = new THREE.Vector3(x,0,z);
+			geom.vertices.push(v);
+		};
+
+		geom.faces.push( new THREE.Face3( 0, 2, 1 ) );
+		geom.computeFaceNormals();
+
+		var material = new THREE.MeshLambertMaterial( { ambient: 0xff5533, color:0x90c9d1 } );
+		realScanObject = new THREE.Mesh( geom, material );
+		// realScanObject.scale = realScanObject.scale.multiplyScalar(50);
+		console.log(realScanObject);
+		scene.add(realScanObject);
 	}
 
 	function init() {
@@ -56,31 +77,9 @@ $(document).ready(function() {
 		camera.lookAt(new THREE.Vector3(0,0,0));
 
 		scene = new THREE.Scene();
-
-		// object
-
-		// var loader = new THREE.STLLoader();
-		// loader.addEventListener( 'load', function ( event ) {
-
-		//     var geometry = event.content;
-
-		//     var material = new THREE.MeshLambertMaterial( { ambient: 0xff5533, color: 0xff5533 } );
-
-		//     stlObject = new THREE.Mesh( geometry, material );
-
-		//     scene.add( stlObject );
-
-		// } );
-		// loader.load( './models/stl/Budda.STL' );
-
 		// axis
 
 		debugaxis(500);
-
-		// scan plane 
-		// createPlane(scene);
-
-		// lights
 
 		scene.add( new THREE.AmbientLight( 0x222222 ) );
 
@@ -135,35 +134,22 @@ $(document).ready(function() {
 	
 
 	function moveScan(step) {
-		var y = scanObject.position.y + direction;
+		// realScanObject.position.setY(currentY);
 
-		if (scanObject.position.y >= MAX_SCAN) {
-			direction = -1;
-		};
-
-		if (scanObject.position.y <= MIN_SCAN) {
-			direction = 1;
-		};
-
-		scanObject.position = new THREE.Vector3(0,y,0);
+		// scanObject.position = new THREE.Vector3(0,y,0);
 	}
 
 	function render() {
 
 		var timer = Date.now() * 0.0005;
 
-		camera.position.x = Math.cos( timer ) * CAMERA_DISTANCE;
-		camera.position.z = Math.sin( timer ) * CAMERA_DISTANCE;
-		// camera.rotation.x = timer;
+		var center = (stlObject) ? stlObject.geometry.boundingSphere.center : new THREE.Vector3(0,0,0);
 
-		// camera.position.set( -100,500,800 );
-		camera.lookAt(new THREE.Vector3(0,0,0));
+		camera.position.x = center.x + Math.cos( timer ) * CAMERA_DISTANCE;
+		camera.position.y = center.y + CAMERA_DISTANCE * 0.3;
+		camera.position.z = center.z + Math.sin( timer ) * CAMERA_DISTANCE;
 
-		// camera.lookAt( scene.position );
-		if (scanning) {
-			moveScan(timer * 0.001);
-		};
-		
+		camera.lookAt(center);
 
 		renderer.render( scene, camera );
 	}
@@ -213,11 +199,6 @@ $(document).ready(function() {
 		stlObject.position = new THREE.Vector3(x,y,z);
 
 	}
-
-	$("#scan-button").click(function() {
-		scanning = !scanning;
-		$(this).html(scanning ? 'Stop scanning' : 'Start scanning');
-	});
 
 	// Rotate an object around an arbitrary axis in object space
 	var rotObjectMatrix;
@@ -271,10 +252,10 @@ $(document).ready(function() {
 			// var material = new THREE.MeshBasicMaterial( { color: 0xff5533 } );
 
 			stlObject = new THREE.Mesh( geometry, material );
-			var scale = 50;
+			var scale = 1;
 			stlObject.scale = stlObject.scale.multiplyScalar(scale);
 
-			var helper = new THREE.BoundingBoxHelper(stlObject, 0xff0000);
+			helper = new THREE.BoundingBoxHelper(stlObject, 0xff0000);
 			helper.update();
 			// If you want a visible bounding box
 			scene.add(helper);
@@ -293,7 +274,14 @@ $(document).ready(function() {
 			var size = Math.abs(Math.min(boxMin.z,boxMin.x)) + Math.abs(Math.max(boxMax.x,boxMax.z));
 			size *= 1.1;
 
-			createPlane(scene,size);
+			// createPlane(size);
+
+			var radius = stlObject.geometry.boundingSphere.radius;
+			createRealScanObject(radius * 6);
+			realScanObject.scale = realScanObject.scale.multiplyScalar(scale);
+			realScanObject.position.y = MIN_SCAN;
+
+			CAMERA_DISTANCE = radius * 3;
 
 		} );
 		showHideWaiting(true);
@@ -301,6 +289,7 @@ $(document).ready(function() {
 
 	}
 
+	//------------------ Buttons actions  --------------------
 	// Import action
 	$('a:contains("Import")').click(function(){
 		alert("Import");
@@ -314,6 +303,43 @@ $(document).ready(function() {
 		importModelFromFile(file);
 	});
 
+	$("#scan-button").click(function() {
+		scanning = !scanning;
+		$(this).html(scanning ? 'Stop scanning' : 'Start scanning');
+
+
+		var minY = stlObject.geometry.boundingBox.min.y;
+		var maxY = stlObject.geometry.boundingBox.max.y;
+
+		var stepsCount = 1000;
+		var step = (maxY - minY) / stepsCount;
+
+		currentY = minY;// + (maxY - minY) / 2;
+		scanLayers = [];
+
+		while (currentY <= maxY) {
+			// console.log("new Y = " + currentY);
+			realScanObject.position.setY(currentY);
+			// console.log(realScanObject.position.y);
+			var lineGeometry = intersectionWith3DObjectAndPlane(stlObject,realScanObject);
+			// console.log(lineGeometry.vertices);
+
+			var lineMat = new THREE.LineBasicMaterial({color: 0x00efcc, lineWidth: 1});
+			var line = new THREE.Line(lineGeometry, lineMat);
+			line.type = THREE.Lines;
+			scanLayers.push(line);
+			scene.add(line);
+
+			currentY += step;
+		}
+
+		$("#layers-slider").slider({max: scanLayers.length - 1});
+
+		scene.remove(realScanObject);
+		scene.remove(stlObject);
+
+	});
+
 	function showHideWaiting(isShow) {
 		var spinner = $("#waiting-spinner");
 		if (isShow) {
@@ -322,7 +348,21 @@ $(document).ready(function() {
 			spinner.hide();
 		}
 	}
-	
+
+	// var slider = $("#layers-slider").slider();
+	$("#layers-slider").on('slide', function(slideEvt) {
+		// $("#ex6SliderVal").text(slideEvt.value);
+		var value = slideEvt.value;
+		var showOneLayer = $("#show-one-layer").prop("checked");
+
+		for (var i = 0; i < scanLayers.length; i++) {
+			if ((showOneLayer && i == value) || (!showOneLayer && i <= value)) {
+				scanLayers[i].visible = true;
+			} else {
+				scanLayers[i].visible = false;
+			}
+		}
+	});
 });
 
 

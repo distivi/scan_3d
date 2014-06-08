@@ -28,8 +28,13 @@
 				<!-- <div id="canvas-container"></div> -->
 			</div>
 			<div id="toolbar-container">
-				Tool bar
 				<button type="button" id="scan-button" class="btn btn-success">Scan</button>
+				<div class="well">
+						<input id="layers-slider" type="text" data-slider-min="0" data-slider-step="1" data-slider-value="3">
+						<!-- <span id="ex6CurrentSliderValLabel">Current Slider Value: <span id="ex6SliderVal">3</span></span> -->
+						<span>Show only current layer</span><input type="checkbox" id="show-one-layer" value="Show only current layer">
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -63,9 +68,12 @@
 	<script src="bower_components/jquery/dist/jquery.min.js"></script>
 	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>	
 	<script src="bower_components/threejs/build/three.min.js"></script>
+	<script src="js/bootstrap-slider.js"></script>
 	<script src="js/STLLoader.js"></script>
 	<script src="main.js"></script>
 	<script src="intersection.js"></script>
+
+	<link rel="stylesheet" href="css/slider.css">
 
 
 	<div id="waiting-spinner" hidden>
