@@ -84,14 +84,21 @@ THREE.STLLoader.prototype.loadFromFile = function ( file, callback ) {
 
 	fileReader.onload = function(event) {
 		var contents = event.target.result;
-		// console.log("File contents: " + contents);
+		console.log(event.total);
+		if (event.total == 5) {
+			if (contents.toLowerCase() === "solid") {
+				fileReader.readAsText(file);
+			} else {
+				fileReader.readAsBinaryString(file);
+			}
+		} else {
+			var geometry = scope.parse( contents );
 
-		var geometry = scope.parse( contents );
-		console.log("geometry ");
-		console.log(geometry);
-		scope.dispatchEvent( { type: 'load', content: geometry } );
+			scope.dispatchEvent( { type: 'load', content: geometry } );
 
-		if ( callback ) callback( geometry );
+			if ( callback ) callback( geometry );
+		}
+		
 	};
 
 	fileReader.onabort = function(event) {
@@ -106,8 +113,17 @@ THREE.STLLoader.prototype.loadFromFile = function ( file, callback ) {
 	fileReader.onerror = function(event) {
 		console.error("File could not be read! Code " + event.target.error.code);
 	};
+
 	console.log("file start loading " + file);
-	fileReader.readAsText(file);
+
+	var blob = file.slice(0, 5);
+	console.log("blob");
+	console.log(blob);
+
+	fileReader.readAsText(blob);
+
+	// fileReader.readAsText(file);
+	// fileReader.readAsBinaryString(file);
 }
 
 THREE.STLLoader.prototype.parse = function ( data ) {
@@ -120,6 +136,8 @@ THREE.STLLoader.prototype.parse = function ( data ) {
 		face_size = (32 / 8 * 3) + ((32 / 8 * 3) * 3) + (16 / 8);
 		n_faces = reader.getUint32(80,true);
 		expect = 80 + (32 / 8) + (n_faces * face_size);
+		console.log("expect " + expect);
+		console.log("reader.byteLength " + reader.byteLength);
 		return expect === reader.byteLength;
 
 	};
@@ -172,7 +190,9 @@ THREE.STLLoader.prototype.parseBinary = function (data) {
 	}
 
 	geometry.computeCentroids();
+	geometry.computeBoundingBox();
 	geometry.computeBoundingSphere();
+
 
 	return geometry;
 
@@ -181,7 +201,7 @@ THREE.STLLoader.prototype.parseBinary = function (data) {
 THREE.STLLoader.prototype.parseASCII = function (data) {
 
 	console.log("parseASCII");
-	console.log(data);
+	// console.log(data);
 
 	var geometry, length, normal, patternFace, patternNormal, patternVertex, result, text;
 	geometry = new THREE.Geometry();

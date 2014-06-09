@@ -4,8 +4,8 @@
 	<meta charset="UTF-8">
 	<title>Test 3d</title>	
 	<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" >
-	<link rel="stylesheet" href="main.css">
-	<!-- <link rel="stylesheet" href="main.css"> -->
+	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/slider.css">
 </head>
 <body>
 	<header>
@@ -15,8 +15,7 @@
 					File <span class="caret"></span>
 				</a>
 				<ul class="dropdown-menu">
-					<li><a href="">Import</a></li>
-					<li><a href="" data-toggle="modal" data-target="#myModal">test</a></li>
+					<li><a href="" data-toggle="modal" data-target="#myModal">Import</a></li>
 				</ul>
 			</li>
 
@@ -28,12 +27,32 @@
 				<!-- <div id="canvas-container"></div> -->
 			</div>
 			<div id="toolbar-container">
-				<button type="button" id="scan-button" class="btn btn-success">Scan</button>
-				<div class="well">
-						<input id="layers-slider" type="text" data-slider-min="0" data-slider-step="1" data-slider-value="3">
-						<!-- <span id="ex6CurrentSliderValLabel">Current Slider Value: <span id="ex6SliderVal">3</span></span> -->
-						<span>Show only current layer</span><input type="checkbox" id="show-one-layer" value="Show only current layer">
+				<div class="well" id="scan-layers-well" hidden>
+					<div class="input-group input-group-sm">
+						<span class="input-group-addon">Model Height</span>
+						<input id="model-height-input" type="number" class="form-control" value="50">
+						<span class="input-group-addon">mm</span>
 					</div>
+					<div class="vertical-space-5"></div>
+					<div class="input-group input-group-sm">
+						<span class="input-group-addon">Layer Height</span>
+						<input id="layer-height-input" type="number" class="form-control" value="0.3" min="0.01" step="0.01">
+						<span class="input-group-addon">mm</span>
+					</div>
+					<div class="vertical-space-5"></div>
+					<button type="button" id="scan-button" class="btn btn-success">Split Object to 2D layers</button>
+				</div>
+
+
+
+				<div class="well" id="show-layers-well"  hidden>
+						<input id="layers-slider" type="text" data-slider-min="0" data-slider-step="1" data-slider-value="3" hidden>
+						<div class="vertical-space-5"></div>
+						<span class="tool-text">Show only current layer </span><input type="checkbox" id="show-one-layer" value="Show only current layer">
+						<div class="vertical-space-5"></div>
+						<button type="button" id="show-hide-model-button" class="btn btn-success">Show/Hide Model</button>
+						<div class="vertical-space-5"></div>
+						<button type="button" id="fill-layer-button" class="btn btn-success">Fill layers</button>
 				</div>
 			</div>
 		</div>
@@ -45,7 +64,7 @@
 
 
 	<!-- Import dialog -->
-	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal fade " id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	  <div class="modal-dialog">
 		<div class="modal-content">
 		  <div class="modal-header">
@@ -58,7 +77,6 @@
 		  </div>
 		  <div class="modal-footer">
 			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-			<button type="button" class="btn btn-primary">Import</button>
 		  </div>
 		</div>
 	  </div>
@@ -69,12 +87,10 @@
 	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>	
 	<script src="bower_components/threejs/build/three.min.js"></script>
 	<script src="js/bootstrap-slider.js"></script>
+	<script src="js/jquery.mousewheel.min.js"></script>
 	<script src="js/STLLoader.js"></script>
 	<script src="main.js"></script>
 	<script src="intersection.js"></script>
-
-	<link rel="stylesheet" href="css/slider.css">
-
 
 	<div id="waiting-spinner" hidden>
 		Please wait...

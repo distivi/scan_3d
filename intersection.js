@@ -3,12 +3,12 @@ function intersectionWith3DObjectAndPlane(object,plane) {
 				b: plane.geometry.vertices[1],
 				c: plane.geometry.vertices[2]};
 
-	var newY = plane.position.y;
-	scanPlane.a.setY(newY); 
-	scanPlane.b.setY(newY);
-	scanPlane.c.setY(newY);
+	var newZ = plane.position.z;
+	scanPlane.a.setZ(newZ); 
+	scanPlane.b.setZ(newZ);
+	scanPlane.c.setZ(newZ);
 
-	// console.log(newY);
+	// console.log(newZ);
 	// console.log("new plane");
 	// console.log(scanPlane.a.y);
 
@@ -69,28 +69,6 @@ function segmentForIntersectPlaneWithPlane(face, scanPlane) {
 			console.log(" mid points СA(" + cCA.x + " ; " + cCA.y + " ; " + cCA.z + ") ");
 		};
 	};
-	
-
-
-	// var isValidAB = isValidVertex(cAB);
-	// var isValidBC = isValidVertex(cBC);
-	// var isValidCA = isValidVertex(cCA);
-
-	// if (!isValidAB && !isValidBC && !isValidCA) {
-	// 	// console.log("face don't intersect");
-	// 	return null;
-	// } else if (isValidAB && isValidBC && isValidCA) {
-	// 	// console.log("face intersect fully");
-	// 	return {a: cAB, b: cBC, c:cCA};
-	// } else {
-	// 	if (isValidAB && isValidBC) {
-	// 		return {a: cAB, b: cBC};
-	// 	} else if (isValidBC && isValidCA) {
-	// 		return {a: cBC, b: cCA};
-	// 	} else {
-	// 		return {a: cCA, b: cAB};
-	// 	};
-	// };
 
 	if (cAB && cBC) {
 		return {a: cAB, b: cBC};
@@ -173,9 +151,7 @@ function LineFacet(p1,p2,pa,pb,pc) {
 
 	if (Math.abs(total - 360) > EPS)
 		return false;
-	// console.log("return 3");
-	// console.log("return p");
-	// console.log(p);
+
 	return p;
 }
 
@@ -189,47 +165,51 @@ function calcIntersectSegmentWithPlane (segment,plane) {
 	var pB = plane.b;
 	var pC = plane.c;
 	return LineFacet(p1,p2,pA,pB,pC);
-
-/*
-	var Axr = segment.A.x; var Ayr = segment.A.y; var Azr = segment.A.z;
-	var Bxr = segment.B.x; var Byr = segment.B.y; var Bzr = segment.B.z;
-
-	var Cxr = plane.a.x; var Cyr = plane.a.y; var Czr = plane.a.z;
-	var Dxr = plane.b.x; var Dyr = plane.b.y; var Dzr = plane.b.z;
-	var Exr = plane.c.x; var Eyr = plane.c.y; var Ezr = plane.c.z;
-
-	var x11=Axr; var y11=Ayr; var z11=Azr;
-	var x12=Bxr; var y12=Byr; var z12=Bzr;
-
-	var x1=Cxr; var y1=Cyr; var z1=Czr;
-	var x2=Dxr; var y2=Dyr;	var z2=Dzr;
-	var x3=Exr; var y3=Eyr;	var z3=Ezr;
-
-	var s101=(y2-y1)*(z3-z1)-(z2-z1)*(y3-y1); //  ' A 
-	var s102=(z2-z1)*(x3-x1)-(x2-x1)*(z3-z1);  // ' B 
-	var s103=(x2-x1)*(y3-y1)-(y2-y1)*(x3-x1); //  ' C 
-	var s104=-(s101*x1+s102*y1+s103*z1);      //  ' D 
-	var s105=s101*(x12-x11)+s102*(y12-y11)+s103*(z12-z11); 
-	var s=(-s104-s101*x11-s102*y11-s103*z11)/s105; 
-	var x = x11*1+(x12-x11)*s; 
-	var y = y11*1+(y12-y11)*s; 
-	var z = z11*1+(z12-z11)*s; 
-
-	var mult = 1e+8;
-	var nx = x;// Math.round(x * mult) / mult;
-	var ny = y;// Math.round(y * mult) / mult;
-	var nz = z;// Math.round(z * mult) / mult;
-
-	var point = new THREE.Vector3(nx,ny,nz);
-	return point;
-	*/
 }
 
-function isValidVertex(vertex) {
-	if ((Math.abs(vertex.x) == Infinity) || 
-		(Math.abs(vertex.y) == Infinity) || 
-		(Math.abs(vertex.z) == Infinity)) {
+function intersactionWithLayerAndLine(layer, line) {
+
+	var count = layer.geometry.vertices.length;
+	var points = [];
+	for (var i = 0; i < count - 1; i += 2) {
+		var p1 = layer.geometry.vertices[i];
+		var p2 = layer.geometry.vertices[i + 1];
+		var intersectPoint = intersection2Segments(p1,p2,line.A,line.B);
+		if (intersectPoint) {
+			points.push(intersectPoint);
+		};
+	}
+	return points;
+}
+
+
+function intersection2Segments(start1,end1,start2,end2) {
+	var dir1 = new THREE.Vector2(end1.x - start1.x,end1.y - start1.y);
+	var dir2 = new THREE.Vector2(end2.x - start2.x,end2.y - start2.y);
+
+	//считаем уравнения прямых проходящих через отрезки
+	var a1 = -dir1.y;
+	var b1 = +dir1.x;
+	var d1 = -(a1*start1.x + b1*start1.y);
+
+	var a2 = -dir2.y;
+	var b2 = +dir2.x;
+	var d2 = -(a2*start2.x + b2*start2.y);
+
+	//подставляем концы отрезков, для выяснения в каких полуплоскотях они
+	var seg1_line2_start = a2*start1.x + b2*start1.y + d2;
+	var seg1_line2_end = a2*end1.x + b2*end1.y + d2;
+
+	var seg2_line1_start = a1*start2.x + b1*start2.y + d1;
+	var seg2_line1_end = a1*end2.x + b1*end2.y + d1;
+
+	//если концы одного отрезка имеют один знак, значит он в одной полуплоскости и пересечения нет.
+	if (seg1_line2_start * seg1_line2_end >= 0 || seg2_line1_start * seg2_line1_end >= 0) 
 		return false;
-	};
-	return true;
+
+	var u = seg1_line2_start / (seg1_line2_start - seg1_line2_end);
+	dir1.multiplyScalar(u);
+	var out_intersection = new THREE.Vector3(start1.x + dir1.x,start1.y + dir1.y,start1.z);
+
+	return out_intersection;
 }

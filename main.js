@@ -1,4 +1,4 @@
-var container, camera, scene, renderer, stlObject, scanObject, realScanObject, helper, scanLayers;
+var container, camera, scene, renderer, stlObject, scanObject, realScanObject, helper, scanLayers, printStep;
 
 
 
@@ -8,7 +8,7 @@ $(document).ready(function() {
 	var CAMERA_DISTANCE = 100;
 	var direction = 1;
 	var scanning = false;
-	var currentY = 0;
+	var currentZ = 0;
 
 
 	init();
@@ -47,24 +47,23 @@ $(document).ready(function() {
 		// scanObject.rotateX(Math.PI / 2);
 	}
 
-	function createRealScanObject(radius) {
+	function createRealScanObject(center,radius) {
 		var geom = new THREE.Geometry();
 
 		for (var i = 0; i < 3; i++) {
 			var angle = Math.PI * 2 * (i / 3.0);
-			var x = radius * Math.cos(angle);
-			var z = radius * Math.sin(angle);
-			var v = new THREE.Vector3(x,0,z);
+			var x = center.x + radius * Math.cos(angle);
+			var y = center.y +  radius * Math.sin(angle);
+			var v = new THREE.Vector3(x,y,0);
 			geom.vertices.push(v);
 		};
 
-		geom.faces.push( new THREE.Face3( 0, 2, 1 ) );
+		geom.faces.push( new THREE.Face3( 0, 1, 2 ) );
 		geom.computeFaceNormals();
 
 		var material = new THREE.MeshLambertMaterial( { ambient: 0xff5533, color:0x90c9d1 } );
 		realScanObject = new THREE.Mesh( geom, material );
-		// realScanObject.scale = realScanObject.scale.multiplyScalar(50);
-		console.log(realScanObject);
+
 		scene.add(realScanObject);
 	}
 
@@ -74,6 +73,7 @@ $(document).ready(function() {
 		// document.body.appendChild( container );
 		camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 100000 );
 		camera.position.set( -100,20,800 );
+		camera.up = new THREE.Vector3(0, 0, 1); 
 		camera.lookAt(new THREE.Vector3(0,0,0));
 
 		scene = new THREE.Scene();
@@ -134,7 +134,7 @@ $(document).ready(function() {
 	
 
 	function moveScan(step) {
-		// realScanObject.position.setY(currentY);
+		// realScanObject.position.setY(currentZ);
 
 		// scanObject.position = new THREE.Vector3(0,y,0);
 	}
@@ -146,8 +146,8 @@ $(document).ready(function() {
 		var center = (stlObject) ? stlObject.geometry.boundingSphere.center : new THREE.Vector3(0,0,0);
 
 		camera.position.x = center.x + Math.cos( timer ) * CAMERA_DISTANCE;
-		camera.position.y = center.y + CAMERA_DISTANCE * 0.3;
-		camera.position.z = center.z + Math.sin( timer ) * CAMERA_DISTANCE;
+		camera.position.y = center.y + Math.sin( timer ) * CAMERA_DISTANCE;
+		camera.position.z = center.z + CAMERA_DISTANCE * 0.3;
 
 		camera.lookAt(center);
 
@@ -242,20 +242,22 @@ $(document).ready(function() {
 		var loader = new THREE.STLLoader();
 		loader.addEventListener( 'load', function ( event ) {
 			showHideWaiting(false);
-			console.log(event);
+			$('#myModal').modal('hide')
+			$('#scan-layers-well').show();
 			var geometry = event.content;
 
+			if (stlObject) {
+				scene.remove(stlObject);
+			};
 
-			// console.log(geometry);
-
-			var material = new THREE.MeshLambertMaterial( { ambient: 0xff5533, color: 0xff5533 } );
+			var material = new THREE.MeshLambertMaterial( { ambient: 0xff5533, color: 0x9dbaff33 } );
 			// var material = new THREE.MeshBasicMaterial( { color: 0xff5533 } );
 
 			stlObject = new THREE.Mesh( geometry, material );
 			var scale = 1;
 			stlObject.scale = stlObject.scale.multiplyScalar(scale);
 
-			helper = new THREE.BoundingBoxHelper(stlObject, 0xff0000);
+			helper = new THREE.BoundingBoxHelper(stlObject, 0xd2d184);
 			helper.update();
 			// If you want a visible bounding box
 			scene.add(helper);
@@ -268,8 +270,8 @@ $(document).ready(function() {
 			var boxMin = helper.box.min;
 			var boxMax = helper.box.max;
 
-			MIN_SCAN = boxMin.y;
-			MAX_SCAN = boxMax.y;
+			MIN_SCAN = boxMin.z;
+			MAX_SCAN = boxMax.z;
 
 			var size = Math.abs(Math.min(boxMin.z,boxMin.x)) + Math.abs(Math.max(boxMax.x,boxMax.z));
 			size *= 1.1;
@@ -277,9 +279,9 @@ $(document).ready(function() {
 			// createPlane(size);
 
 			var radius = stlObject.geometry.boundingSphere.radius;
-			createRealScanObject(radius * 6);
+			createRealScanObject(stlObject.geometry.boundingSphere.center,radius * 6);
 			realScanObject.scale = realScanObject.scale.multiplyScalar(scale);
-			realScanObject.position.y = MIN_SCAN;
+			realScanObject.position.z = MIN_SCAN;
 
 			CAMERA_DISTANCE = radius * 3;
 
@@ -291,9 +293,6 @@ $(document).ready(function() {
 
 	//------------------ Buttons actions  --------------------
 	// Import action
-	$('a:contains("Import")').click(function(){
-		alert("Import");
-	});
 
 	$('input[type=file]').change(function () {
 		console.dir(this.files[0])
@@ -305,35 +304,51 @@ $(document).ready(function() {
 
 	$("#scan-button").click(function() {
 		scanning = !scanning;
-		$(this).html(scanning ? 'Stop scanning' : 'Start scanning');
+
+		var minZ = stlObject.geometry.boundingBox.min.z;
+		var maxZ = stlObject.geometry.boundingBox.max.z;
+
+		var modelHeight = parseFloat($("#model-height-input").val());
+		var layerHeight = parseFloat($("#layer-height-input").val());
+		$("#model-height-input").prop('disabled', true);
+		$("#layer-height-input").prop('disabled', true);
 
 
-		var minY = stlObject.geometry.boundingBox.min.y;
-		var maxY = stlObject.geometry.boundingBox.max.y;
+		var stepsCount = modelHeight / layerHeight;
+		printStep = (maxZ - minZ) / stepsCount;
 
-		var stepsCount = 1000;
-		var step = (maxY - minY) / stepsCount;
-
-		currentY = minY;// + (maxY - minY) / 2;
+		currentZ = minZ;// + (maxZ - minY) / 2;
 		scanLayers = [];
 
-		while (currentY <= maxY) {
-			// console.log("new Y = " + currentY);
-			realScanObject.position.setY(currentY);
+		while (currentZ <= maxZ) {
+			// console.log("new Y = " + currentZ);
+			realScanObject.position.setZ(currentZ);
 			// console.log(realScanObject.position.y);
 			var lineGeometry = intersectionWith3DObjectAndPlane(stlObject,realScanObject);
+			lineGeometry.computeBoundingBox();
 			// console.log(lineGeometry.vertices);
 
-			var lineMat = new THREE.LineBasicMaterial({color: 0x00efcc, lineWidth: 1});
-			var line = new THREE.Line(lineGeometry, lineMat);
+			var lineMat = new THREE.LineBasicMaterial({color: 0x00efcc, lineWidth: 5});
+			var line = new THREE.Line(lineGeometry, lineMat, THREE.LinePieces);
 			line.type = THREE.Lines;
-			scanLayers.push(line);
+
+
+
+			var scanLayer = {baseLine: line};
+
+			scanLayers.push(scanLayer);
 			scene.add(line);
 
-			currentY += step;
+			currentZ += printStep;
 		}
 
-		$("#layers-slider").slider({max: scanLayers.length - 1});
+		
+
+		$('#show-layers-well').show("show", function() {
+			$("#layers-slider").slider({max: scanLayers.length - 1});
+			$("#layers-slider").hide();
+		}); 
+		
 
 		scene.remove(realScanObject);
 		scene.remove(stlObject);
@@ -356,12 +371,106 @@ $(document).ready(function() {
 		var showOneLayer = $("#show-one-layer").prop("checked");
 
 		for (var i = 0; i < scanLayers.length; i++) {
+			var isVisible;
 			if ((showOneLayer && i == value) || (!showOneLayer && i <= value)) {
-				scanLayers[i].visible = true;
-			} else {
-				scanLayers[i].visible = false;
+				isVisible = true;
+			} else { 
+				isVisible = false;
 			}
+
+			scanLayers[i].baseLine.visible = isVisible;
+			scanLayers[i].baseLine.children.forEach(function(child) {child.visible = isVisible});
 		}
+	});
+
+	$("#show-hide-model-button").on("click", function() {
+		if (stlObject.parent) {
+			scene.remove(stlObject);
+		} else {
+			scene.add(stlObject);
+		}
+	});
+
+	$("#fill-layer-button").on("click", function() {
+
+		scanLayers.forEach(function(layer){
+			// layer = scanLayers[64];
+			layer.fillLines = [];
+			var index = scanLayers.indexOf(layer);
+			var isXaxis = index % 2 == 0;
+
+			var min = layer.baseLine.geometry.boundingBox.min;
+			var max = layer.baseLine.geometry.boundingBox.max;
+
+			var scanFrom, scanTo;
+			if (isXaxis) {
+				// move scan line from minY to maxY
+				scanFrom = min.y;
+				scanTo = max.y;
+			} else {
+				// move scan line from minX to maxX
+				scanFrom = min.x;
+				scanTo = max.x;
+			};
+
+			var currentScanValue = scanFrom;
+			
+			while (currentScanValue <= scanTo) {
+				var lineMinX = isXaxis ? min.x - 20 : currentScanValue;
+				var lineMaxX = isXaxis ? max.x + 20 : currentScanValue;
+				var lineMinY = isXaxis ? currentScanValue : min.y - 20;
+				var lineMaxY = isXaxis ? currentScanValue : max.y + 20;
+
+
+				// console.log("lineMinX " + lineMinX);
+				// console.log("lineMaxX " + lineMaxX);
+				// console.log("lineMinY " + lineMinY);
+				// console.log("lineMaxY " + lineMaxY);
+
+				var line = {A: new THREE.Vector2(lineMinX,lineMinY), B: new THREE.Vector2(lineMaxX,lineMaxY)};
+				// console.log("line");
+				// console.log(line);
+				var intersacPoints = intersactionWithLayerAndLine(layer.baseLine, line);
+
+				if (intersacPoints.length > 0) {
+					if (isXaxis) {
+						intersacPoints.sort(function(a,b) {return a.x > b.x});
+					} else {
+						intersacPoints.sort(function(a,b) {return a.y > b.y});
+					}				
+					
+					var lineGeo = new THREE.Geometry();
+
+					for (var i = 0; i < intersacPoints.length - 1; i += 2) {
+						lineGeo.vertices.push(intersacPoints[i],intersacPoints[i+1]);
+					}
+
+					var lineMat = new THREE.LineBasicMaterial({color: 0x8bcb73, lineWidth: 5});
+					var line = new THREE.Line(lineGeo, lineMat, THREE.LinePieces);
+					line.type = THREE.Lines;
+					// console.log(line);
+
+					// layer.fillLines.push(line);
+					layer.baseLine.add(line);
+					line.visible = false;
+				};
+				
+				currentScanValue += printStep;
+			}
+		});
+	});
+
+
+
+
+
+	// mouse eventes
+
+	$('#canvas-container').mousewheel(function(event) {
+		var delta = event.deltaY;
+		if (CAMERA_DISTANCE - delta > 0.1) {
+			CAMERA_DISTANCE -= delta;
+		};
 	});
 });
 
