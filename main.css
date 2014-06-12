@@ -86,5 +86,9 @@ header
 	color: white;
 	line-height: 150px;
 	text-align: center;
+}
 
+#gcode-export
+{
+	margin: 100px;
 }

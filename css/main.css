@@ -106,3 +106,24 @@ header
 {
 	display: block;
 }
+
+#output-panel
+{
+	margin: 20px;
+}
+
+#gcode-export
+{
+	margin: 10px;
+	border-left: 5px solid #d5d1d4;
+	padding-left: 10px;
+	height: 200px;
+	overflow: scroll;
+}
+
+.code-line
+{
+	line-height: 14px;
+	font-family: Consolas, monaco, monospace;
+	margin: 1px 0;
+}

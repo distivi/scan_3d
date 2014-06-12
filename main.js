@@ -460,9 +460,43 @@ $(document).ready(function() {
 		});
 	});
 
+	$("#export-button").on("click", function() {
+		$("#output-panel").show();
 
+		var gcodeText = gcodeLine("G21 ;metric is good!") +
+						gcodeLine("G90 ;absolute positioning") +
+						gcodeLine("T0; select new extruder") +
+						gcodeLine("M104 S200") +
+						gcodeLine("G92 E0 ;zero the extruded length") +
+						gcodeLine("G28 Y0 ;go home");
 
+		scanLayers.forEach(function(layer) {
+			gcodeText += gcodeLine("M101");
+			layer.baseLine.children.forEach(function(scanLine) {
+				scanLine.geometry.vertices.forEach(function(vertex) {
+					gcodeText += gcodeLine(gcodeFromVertex(vertex));
+				});
+			});
+			gcodeText += gcodeLine("M103");
+		});
+		gcodeText += gcodeLine("M113 S0.0");
+		
+		$("#gcode-export").text("");
+		$("#gcode-export").append(gcodeText);
+	});
 
+	function gcodeLine(text) {
+		return "<div class='code-line'>" + text + "</div>";
+	}
+
+	function gcodeFromVertex(vertex) {
+		var x = Math.round(vertex.x * 100) / 100;
+		var y = Math.round(vertex.y * 100) / 100;
+		var z = Math.round(vertex.z * 100) / 100;
+
+		var codeString = "G1 X" + x + " Y" + y + " Z" + z;
+		return codeString;
+	}
 
 	// mouse eventes
 
